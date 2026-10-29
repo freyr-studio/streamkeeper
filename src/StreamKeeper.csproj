@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <AssemblyName>StreamKeeper</AssemblyName>
     <RootNamespace>StreamKeeper</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Product>StreamKeeper</Product>
     <ApplicationIcon>Assets\StreamKeeper.ico</ApplicationIcon>
     <TargetFramework>net8.0-windows</TargetFramework>

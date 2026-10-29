@@ -22,22 +22,55 @@ public static class StatusChecker
         return http;
     }
 
+    // Consecutive failures per room (key = platform + username)
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, int> Failures = new();
+    private const int FailuresBeforeUnknown = 3;
+
     public static async Task<RoomStatus> CheckAsync(Room room)
+    {
+        var key = $"{room.Platform}:{room.Username}";
+
+        for (int attempt = 1; attempt <= 2; attempt++)
+        {
+            try
+            {
+                var status = await CheckOnceAsync(room);
+                Failures.TryRemove(key, out _);
+                return status;
+            }
+            catch (Exception ex)
+            {
+                if (attempt == 1) { await Task.Delay(2000); continue; } // second attempt
+                Log($"{key} -> {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        // Failed: keep the last known status, only show Unknown after several failures
+        int count = Failures.AddOrUpdate(key, 1, (_, c) => c + 1);
+        return count < FailuresBeforeUnknown ? room.Status : RoomStatus.Unknown;
+    }
+
+    private static async Task<RoomStatus> CheckOnceAsync(Room room) => room.Platform switch
+    {
+        Platform.Chaturbate => await CheckChaturbateAsync(room.Username),
+        Platform.Twitch     => await CheckTwitchAsync(room.Username),
+        Platform.Kick       => await CheckKickAsync(room.Username),
+        _                   => RoomStatus.Unknown
+    };
+
+    // Failure log : %LOCALAPPDATA%\StreamKeeper\logs\status.log
+    private static readonly object LogLock = new();
+    private static void Log(string message)
     {
         try
         {
-            return room.Platform switch
-            {
-                Platform.Chaturbate => await CheckChaturbateAsync(room.Username),
-                Platform.Twitch     => await CheckTwitchAsync(room.Username),
-                Platform.Kick       => await CheckKickAsync(room.Username),
-                _                   => RoomStatus.Unknown
-            };
+            var dir = System.IO.Path.Combine(RoomStore.AppDataFolder, "logs");
+            System.IO.Directory.CreateDirectory(dir);
+            lock (LogLock)
+                System.IO.File.AppendAllText(System.IO.Path.Combine(dir, "status.log"),
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  {message}{Environment.NewLine}");
         }
-        catch
-        {
-            return RoomStatus.Unknown; // erreur réseau, room introuvable, blocage…
-        }
+        catch { }
     }
 
     // ===== Chaturbate =====
