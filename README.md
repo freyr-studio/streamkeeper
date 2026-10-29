@@ -9,6 +9,10 @@
   Chaturbate · Twitch · Kick
 </p>
 
+<p align="center">
+  <img src="docs/main-window.png" alt="StreamKeeper main window" width="900">
+</p>
+
 ---
 
 ## Features
@@ -25,6 +29,10 @@
 - **Shutdown when done** – turns the PC off when the last recording ends (with a cancel button)
 - **4 themes** – Midnight, Dark Purple, Ocean, Slate, switchable live
 - **Status bar** – CPU and RAM used by recordings, free disk space, room counters
+
+<p align="center">
+  <img src="docs/settings.png" alt="Settings and themes" width="420">
+</p>
 
 ## Installation
 
