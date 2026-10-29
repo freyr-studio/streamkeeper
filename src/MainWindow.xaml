@@ -1,0 +1,173 @@
+<ui:FluentWindow x:Class="StreamKeeper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:StreamKeeper"
+        Title="StreamKeeper" Width="1360" Height="850"
+        MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round">
+
+    <Grid Background="{DynamicResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Barre de titre -->
+            <RowDefinition Height="Auto" /> <!-- En-tête -->
+            <RowDefinition Height="Auto" /> <!-- Barre d'URL -->
+            <RowDefinition Height="Auto" /> <!-- Check All + onglets -->
+            <RowDefinition Height="*" />    <!-- Liste -->
+            <RowDefinition Height="Auto" /> <!-- Barre d'état -->
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="StreamKeeper" />
+
+        <!-- ===== EN-TÊTE ===== -->
+        <Grid Grid.Row="1" Margin="24,4,24,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Stream" FontSize="26" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Keeper" FontSize="26" FontWeight="Bold"
+                           Foreground="{DynamicResource AccentBrush}" />
+                <Border Margin="12,0,0,0" Padding="8,2" CornerRadius="6"
+                        Background="{DynamicResource SurfaceBrush}" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static local:AppInfo.DisplayVersion}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </Border>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <ui:Button Content="Folder" Icon="{ui:SymbolIcon Folder24}" Margin="0,0,8,0"
+                           Command="{Binding OpenFolderCommand}" />
+                <ui:DropDownButton Content="List" Icon="{ui:SymbolIcon List24}" Margin="0,0,8,0">
+                    <ui:DropDownButton.Flyout>
+                        <ContextMenu>
+                            <MenuItem Header="Export list" Click="ExportList_Click" />
+                            <MenuItem Header="Import list" Click="ImportList_Click" />
+                        </ContextMenu>
+                    </ui:DropDownButton.Flyout>
+                </ui:DropDownButton>
+                <ui:Button Icon="{ui:SymbolIcon Settings24}" ToolTip="Settings" Margin="0,0,8,0"
+                           Click="Settings_Click" />
+                <ui:Button Icon="{ui:SymbolIcon Bug24}" ToolTip="Report an issue on GitHub" Margin="0,0,8,0"
+                           Click="ReportIssue_Click" />
+                <ui:Button Content="Support me" Icon="{ui:SymbolIcon Heart24}" ToolTip="Support the project on Tipeee"
+                           Margin="0,0,16,0" Click="Support_Click" />
+                <ui:Button Content="Stop All" Icon="{ui:SymbolIcon Stop24}" Appearance="Danger"
+                           Command="{Binding StopAllCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ===== BARRE D'URL ===== -->
+        <Border Grid.Row="2" Margin="24,0,24,16" Padding="16" CornerRadius="12"
+                Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ui:TextBox Grid.Column="0"
+                            PlaceholderText="Paste any supported URL (Chaturbate, Twitch, Kick…)"
+                            Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}"
+                            Icon="{ui:SymbolIcon Link24}">
+                    <ui:TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding AddUrlCommand}" />
+                    </ui:TextBox.InputBindings>
+                </ui:TextBox>
+
+                <ui:Button Grid.Column="1" Content="Paste" Icon="{ui:SymbolIcon ClipboardPaste24}"
+                           Command="{Binding PasteCommand}" Margin="8,0,0,0" />
+                <ui:Button Grid.Column="2" Content="Add URL" Icon="{ui:SymbolIcon Add24}"
+                           Command="{Binding AddUrlCommand}" Appearance="Primary" Margin="8,0,0,0" />
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="24,0,0,0">
+                    <ui:ToggleSwitch Content="Auto Record" Margin="0,0,16,0"
+                                     IsChecked="{Binding AutoRecordEnabled}" />
+                    <ui:ToggleSwitch Content="Shutdown when done"
+                                     IsChecked="{Binding ShutdownWhenDone}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===== CHECK ALL + ONGLETS ===== -->
+        <Grid Grid.Row="3" Margin="24,0,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <ui:Button Content="Check All" Icon="{ui:SymbolIcon CheckboxChecked24}"
+                           Command="{Binding CheckAllCommand}" Margin="0,0,8,0" />
+                <ui:Button Content="Uncheck All" Icon="{ui:SymbolIcon CheckboxUnchecked24}"
+                           Command="{Binding UncheckAllCommand}" />
+            </StackPanel>
+
+            <!-- Onglets : des boutons radio stylés comme des boutons à bascule -->
+            <Border Grid.Column="1" Padding="4" CornerRadius="10"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource {x:Type ToggleButton}}" GroupName="Tabs"
+                                 Content="All" IsChecked="True" Margin="0,0,4,0" MinWidth="70"
+                                 Command="{Binding SetPlatformFilterCommand}" CommandParameter="All" />
+                    <RadioButton Style="{StaticResource {x:Type ToggleButton}}" GroupName="Tabs"
+                                 Content="Chaturbate" Margin="0,0,4,0" MinWidth="70"
+                                 Command="{Binding SetPlatformFilterCommand}" CommandParameter="Chaturbate" />
+                    <RadioButton Style="{StaticResource {x:Type ToggleButton}}" GroupName="Tabs"
+                                 Content="Twitch" Margin="0,0,4,0" MinWidth="70"
+                                 Command="{Binding SetPlatformFilterCommand}" CommandParameter="Twitch" />
+                    <RadioButton Style="{StaticResource {x:Type ToggleButton}}" GroupName="Tabs"
+                                 Content="Kick" Margin="0,0,4,0" MinWidth="70"
+                                 Command="{Binding SetPlatformFilterCommand}" CommandParameter="Kick" />
+                    <RadioButton Style="{StaticResource {x:Type ToggleButton}}" GroupName="Tabs"
+                                 Content="Others" MinWidth="70"
+                                 Command="{Binding SetPlatformFilterCommand}" CommandParameter="Other" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===== LISTE (triée + filtrée) ===== -->
+        <ScrollViewer Grid.Row="4" Margin="24,0,12,8" Padding="0,0,12,0"
+                      VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding RoomsView}"
+                          ItemTemplate="{StaticResource RoomCardTemplate}" />
+        </ScrollViewer>
+
+        <!-- ===== BARRE D'ÉTAT ===== -->
+        <Border Grid.Row="5" Padding="24,10" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                Background="{DynamicResource SurfaceBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding CpuText}" FontSize="12" Margin="0,0,20,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding RamText}" FontSize="12" Margin="0,0,20,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding DiskText}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="2" Text="{Binding CountersText}" FontSize="12"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ui:FluentWindow>

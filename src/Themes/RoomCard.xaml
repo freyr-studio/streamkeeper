@@ -1,0 +1,106 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <DataTemplate x:Key="RoomCardTemplate">
+        <Border x:Name="Card" Margin="0,0,0,8" CornerRadius="10"
+                Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="StatusBar" Grid.Column="0" CornerRadius="10,0,0,10"
+                        Background="{DynamicResource OfflineBrush}" />
+
+                <CheckBox Grid.Column="1" IsChecked="{Binding AutoRecord}"
+                          Margin="16,0,8,0" VerticalAlignment="Center" ToolTip="Auto record" />
+
+                <!-- Nom cliquable : ouvre la room dans le navigateur -->
+                <TextBlock x:Name="NameText" Grid.Column="2" Text="{Binding Username}"
+                           FontSize="15" FontWeight="SemiBold" Cursor="Hand"
+                           HorizontalAlignment="Left" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimaryBrush}" ToolTip="Open in browser">
+                    <TextBlock.InputBindings>
+                        <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding DataContext.OpenRoomCommand,
+                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                      CommandParameter="{Binding}" />
+                    </TextBlock.InputBindings>
+                </TextBlock>
+
+                <Border Grid.Column="3" Padding="10,4" CornerRadius="6" Margin="0,0,8,0"
+                        Background="{DynamicResource SurfaceHoverBrush}" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Platform}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </Border>
+
+                <Border x:Name="StatusBadge" Grid.Column="4" Padding="10,4" CornerRadius="6" MinWidth="90"
+                        Background="#1F64748B" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusText" Text="{Binding Status}" FontSize="12" FontWeight="SemiBold"
+                               HorizontalAlignment="Center" Foreground="{DynamicResource OfflineBrush}" />
+                </Border>
+
+                <TextBlock Grid.Column="5" Text="{Binding Speed}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBlock Grid.Column="6" Text="{Binding Duration}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                <StackPanel Grid.Column="7" Orientation="Horizontal" Margin="0,10,12,10">
+                    <ui:Button Content="Record" Icon="{ui:SymbolIcon Record24}" Appearance="Success" Margin="0,0,6,0"
+                               Command="{Binding DataContext.RecordCommand,
+                                         RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                               CommandParameter="{Binding}" />
+                    <ui:Button Content="Stop" Icon="{ui:SymbolIcon Stop24}" Margin="0,0,6,0"
+                               Command="{Binding DataContext.StopCommand,
+                                         RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                               CommandParameter="{Binding}" />
+                    <ui:Button Icon="{ui:SymbolIcon Delete24}" ToolTip="Remove"
+                               Command="{Binding DataContext.RemoveRoomCommand,
+                                         RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                               CommandParameter="{Binding}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding Status}" Value="Online">
+                <Setter TargetName="StatusBar"   Property="Background" Value="{DynamicResource OnlineBrush}" />
+                <Setter TargetName="StatusText"  Property="Foreground" Value="{DynamicResource OnlineBrush}" />
+                <Setter TargetName="StatusBadge" Property="Background" Value="#1F22C55E" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Status}" Value="Private">
+                <Setter TargetName="StatusBar"   Property="Background" Value="{DynamicResource PrivateBrush}" />
+                <Setter TargetName="StatusText"  Property="Foreground" Value="{DynamicResource PrivateBrush}" />
+                <Setter TargetName="StatusBadge" Property="Background" Value="#1FF59E0B" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Status}" Value="Away">
+                <Setter TargetName="StatusBar"   Property="Background" Value="{DynamicResource PrivateBrush}" />
+                <Setter TargetName="StatusText"  Property="Foreground" Value="{DynamicResource PrivateBrush}" />
+                <Setter TargetName="StatusBadge" Property="Background" Value="#1FF59E0B" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                <Setter TargetName="StatusBar"   Property="Background" Value="{DynamicResource RecordingBrush}" />
+                <Setter TargetName="StatusText"  Property="Foreground" Value="{DynamicResource RecordingBrush}" />
+                <Setter TargetName="StatusText"  Property="Text" Value="Recording" />
+                <Setter TargetName="StatusBadge" Property="Background" Value="#1FEF4444" />
+            </DataTrigger>
+            <Trigger SourceName="Card" Property="IsMouseOver" Value="True">
+                <Setter TargetName="Card" Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+            </Trigger>
+            <!-- Survol du nom : souligné + couleur d'accent -->
+            <Trigger SourceName="NameText" Property="IsMouseOver" Value="True">
+                <Setter TargetName="NameText" Property="TextDecorations" Value="Underline" />
+                <Setter TargetName="NameText" Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            </Trigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+</ResourceDictionary>
